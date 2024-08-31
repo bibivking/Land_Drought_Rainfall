@@ -1,0 +1,33 @@
+# File extensions
+*.png
+*.pdf
+*.eps
+*.csv
+*.ps
+*.txt
+*.nc
+
+# Directory structures for extensions
+**/*.pdf
+**/*.eps
+**/*.csv
+**/*.ps
+**/*.txt
+**/*.nc
+
+# Backup and temporary files
+backup/
+*sh.o*
+**/*sh.o*
+
+# nohup output files
+**/nohup.out
+
+# Ignoring specific folders
+txt/
+plots/
+data/
+refuse/
+csv/
+nc_file/
+nc_files/
