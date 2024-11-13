@@ -35,6 +35,23 @@ def get_scale(var_name):
         scale = 1.
     return scale
 
+def get_lat_lon(region):
+
+    if region == "Aus":
+        loc_lat    = [-44,-10]
+        loc_lon    = [112,154]
+    elif region == "SE Aus":
+        loc_lat    = [-40,-25]
+        loc_lon    = [135,155]
+    elif region == "CORDEX":
+        loc_lat    = [-52.36,3.87]
+        loc_lon    = [89.25,180]
+    elif region == "North Aus":
+        loc_lat     = [-20,-5]
+        loc_lon     = [121,149]
+
+    return loc_lat, loc_lon
+
 def UTC_to_AEST(time):
 
     Time = time + timedelta(hours=10)
@@ -70,8 +87,10 @@ def mask_by_lat_lon(file_path, loc_lat, loc_lon, lat_name, lon_name):
 
     if 'GLEAM' in file_path:
         lat = lat[::-1]
-    # #print(lat)
-    # #print(lon)
+    # print('in mask_by_lat_lon, lat',lat)
+    # print('in mask_by_lat_lon, lon',lon)
+    # print('in mask_by_lat_lon, loc_lat',loc_lat)
+    # print('in mask_by_lat_lon, loc_lon',loc_lon)
 
     if len(np.shape(lat)) == 1:
         # #print("len(np.shape(lat)) == 1")
@@ -267,7 +286,9 @@ def read_var_multi_file(file_paths, var_name, loc_lat=None, loc_lon=None, lat_na
                 mask = mask_by_lat_lon(file_path, loc_lat, loc_lon, lat_name, lon_name)
 
             mask_multi = [ mask ] * ntime
-
+            # plt.contourf(mask)
+            # plt.colorbar()
+            # plt.show()
             # #print("shape of mask_multi",np.shape(mask_multi))
 
             if 'v3-6a' in file_paths[0]:
@@ -732,8 +753,12 @@ def spatial_var_sum(time, Var, time_s, time_e, seconds=None):
 
     time_cood = time_mask(time, time_s, time_e, seconds)
     #print('time[time_cood]',time[time_cood])
+
     var       = np.nansum(Var[time_cood],axis=0)
 
+    # If all values across the time axis for a grid cell are np.nan, the result will be 0.
+    # So need to find the mask value(np.nan) back
+    # var       = np.where(np.isnan(Var[0,:,:]), np.nan, var)
     # np.savetxt("test_var.txt",var,delimiter=",")
     return var
 
@@ -920,9 +945,13 @@ def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
     return new_cmap
 
 # =============================== Regrid ================================
-def regrid_data(lat_in, lon_in, lat_out, lon_out, input_data, method='linear',threshold=None):
+def regrid_data(lat_in, lon_in, lat_out, lon_out, input_data, method='linear', threshold=None):
 
-    if len(np.shape(lat_in)) == 1:
+    if  len(lat_in) > 10000:
+        print('len(lat_in) > 10000')
+        lon_in_1D            = lon_in
+        lat_in_1D            = lat_in
+    elif len(np.shape(lat_in)) == 1:
         lon_in_2D, lat_in_2D = np.meshgrid(lon_in,lat_in)
         lon_in_1D            = np.reshape(lon_in_2D,-1)
         lat_in_1D            = np.reshape(lat_in_2D,-1)
@@ -950,17 +979,30 @@ def regrid_data(lat_in, lon_in, lat_out, lon_out, input_data, method='linear',th
         mask_values     = np.all([~np.isnan(value_tmp),value_tmp>threshold],axis=0)
 
     value     = value_tmp[mask_values]
+
     # ======= CAUTION =======
+    # try:
     lat_in_1D = lat_in_1D[mask_values]  # here I make nan in values as the standard
     lon_in_1D = lon_in_1D[mask_values]
-    #print("shape value = ", np.shape(value))
-    #print("shape lat_in_1D = ", np.shape(lat_in_1D))
-    #print("shape lon_in_1D = ", np.shape(lon_in_1D))
+    # except Exception as e:
+    #     print(f"An error occurred: {e}")
+    #     return None
+
+    check = np.any([ np.any(np.isnan(value)),
+                    np.any(np.isnan(lat_in_1D)),
+                    np.any(np.isnan(lon_in_1D)),
+                    np.any(np.isnan(lon_out_2D)),
+                    np.any(np.isnan(lat_out_2D))])
+    if check:
+        print('MMY ERROR: nan value exists')
+        raise SystemExit
     # =======================
-    #print("value =",value)
-    #print("lat_in_1D =",lat_in_1D)
-    #print("lon_in_1D =",lon_in_1D)
-    Value = griddata((lon_in_1D, lat_in_1D), value, (lon_out_2D, lat_out_2D), method=method)
+
+    try:
+        Value = griddata((lon_in_1D, lat_in_1D), value, (lon_out_2D, lat_out_2D), method=method)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
 
     return Value
 

@@ -96,24 +96,22 @@ def save_land_cover_to_ncfile(lc_coarse,lat_in,lon_in,lc_dyn_clim="time_varying"
 def recast_NVIS_to_CABLE_PFT(lc_fine_res_tmp, lc_type):
 
     '''
+    It is hard to translate NVIS to PFT so I give up.....
+
     In  National Vegetation Information System (NVIS) classification:
     1: Rainforests and Vine Thickets, 2:Eucalypt Tall Open Forests, 3: Eucalypt Open Forests
     4: Eucalypt Low Open Forests, 5: Eucalypt Woodlands, 6: Acacia Forests and Woodlands,
     7: Callitris Forests and Woodlands, 8: Casuarina Forests and Woodlands, 9: Melaleuca Forests and Woodlands,
     10: Other Forests and Woodlands, 11: Eucalypt Open Woodlands, 12: Tropical Eucalypt Woodlands/Grasslands,
     13: Acacia Open Woodlands, 14: Mallee Woodlands and Shrublands, 15: Low Closed Forests and Tall Closed Shrublands,
-    16: Acacia Shrublands, 17: Other Shrublands, 18: Heathlands, 19: Tussock Grasslands, 20: Hummock Grasslands, 
+    16: Acacia Shrublands, 17: Other Shrublands, 18: Heathlands, 19: Tussock Grasslands, 20: Hummock Grasslands,
     21: Other Grasslands, Herblands, Sedgelands and Rushlands, 22: Chenopod Shrublands, Samphire Shrublands and Forblands
-    23: Mangroves, 24: Inland Aquatic - freshwater, salt lakes, lagoons, 25: Cleared, non-native vegetation, buildings, 
+    23: Mangroves, 24: Inland Aquatic - freshwater, salt lakes, lagoons, 25: Cleared, non-native vegetation, buildings,
     26: Unclassified native vegetation, 27: Naturally bare - sand, rock, claypan, mudflat, 28: Sea and estuaries
-    29: Regrowth, modified native vegetation, 30: Unclassified forest, 31: Other Open Woodlands, 
+    29: Regrowth, modified native vegetation, 30: Unclassified forest, 31: Other Open Woodlands,
     32, Mallee Open Woodlands and Sparse Mallee Shrublands, 99: Unknown/no data
 
-    NVIS => CABLE: no change: 1 = 1;  2 = 2;  3 = 3;  4 = 4; 11 = 11
-                    change   : 5 => 2; 6, 7 => 5; 8 => 2; 9=> 6 or 7; 10 => 6 or 7;
-                                12 => 9 or 10; 13 => 15;
-                                14 => 9 (might be 1,2,3,4,5,6,7,10); 15 => 17
-                                16 => 14, 17 => 16
+    NVIS => CABLE: 1,2,3,4,5,6 => 1;  
     '''
 
     "1: evergreen_needleleaf forest; "

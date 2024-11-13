@@ -100,7 +100,7 @@ def add_climatology(leap_year,window=31):
     # ========================== Copy data =============================
     # Open the original NetCDF file
     f_landinfo       = "/g/data/w97/mm3972/model/cable/src/CABLE-AUX/offline/mmy_gridinfo_AU/gridinfo_AWAP_OpenLandMap_ELEV_DLCM_fix.nc"
-    f_MODIS_landinfo = f'/g/data/w97/mm3972/scripts/Drought/Post_drought_rainfall/process_for_CABLE/nc_files/gridinfo_AWAP_OpenLandMap_ELEV_DLCM_fix_MODIS_LAI_albedo_lc_clim_{leap_common}.nc'
+    f_MODIS_landinfo = f'/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/process_for_CABLE/nc_files/gridinfo_AWAP_OpenLandMap_ELEV_DLCM_fix_MODIS_LAI_albedo_lc_clim_{leap_common}.nc'
 
     # Open the source NetCDF file in read mode
     f_in  = nc.Dataset(f_landinfo, 'r')
@@ -114,9 +114,18 @@ def add_climatology(leap_year,window=31):
     for name, dimension in f_in.dimensions.items():
         f_out.createDimension(name, len(dimension) if not dimension.isunlimited() else None)
 
-    # Copy variables except LAI and Albedo
+    # # Copy variables except LAI and Albedo
+    # for name, variable in f_in.variables.items():
+    #     if name not in ['LAI', 'Albedo']:
+    #         f_out_var = f_out.createVariable(name, variable.datatype, variable.dimensions)
+    #         # Copy variable attributes
+    #         f_out_var.setncatts({attr: variable.getncattr(attr) for attr in variable.ncattrs()})
+    #         # Copy data
+    #         f_out_var[:] = variable[:]
+
+    # Copy variables except LAI 
     for name, variable in f_in.variables.items():
-        if name not in ['LAI', 'Albedo']:
+        if name != 'LAI':
             f_out_var = f_out.createVariable(name, variable.datatype, variable.dimensions)
             # Copy variable attributes
             f_out_var.setncatts({attr: variable.getncattr(attr) for attr in variable.ncattrs()})
@@ -134,9 +143,11 @@ def add_climatology(leap_year,window=31):
     lai_var[:, :, :]   = lai_in
 
     # Create new Albedo variable with dimensions [4, 365 or 366, latitude, longitude]
-    albedo_var            = f_out.createVariable('Albedo', 'f4', ('rad1', 'time1', 'latitude', 'longitude'),fill_value=-9999)
+    # albedo_var            = f_out.createVariable('Albedo', 'f4', ('rad1', 'time1', 'latitude', 'longitude'),fill_value=-9999)
+    albedo_var            = f_out.createVariable('Albedo_MODIS', 'f4', ('rad1', 'time1', 'latitude', 'longitude'),fill_value=-9999)
     albedo_var.units      = 'dimensionless'
-    albedo_var.long_name  = 'Surface albedo, 1: BSA_vis, 2: BSA_nir, 3: WSA_vis, 4: WSA_nir"'
+    # albedo_var.long_name  = 'Surface albedo, 1: BSA_vis, 2: BSA_nir, 3: WSA_vis, 4: WSA_nir"'
+    albedo_var.long_name  = 'MODIS Surface albedo, 1: BSA_vis, 2: BSA_nir, 3: WSA_vis, 4: WSA_nir"'
     albedo_var[:, :, :, :] = albedo_in
 
     # copy new landcover
@@ -202,7 +213,7 @@ def add_time_varying(year,window=31):
     # ========================== Copy data =============================
     # Open the original NetCDF file
     f_landinfo       = "/g/data/w97/mm3972/model/cable/src/CABLE-AUX/offline/mmy_gridinfo_AU/gridinfo_AWAP_OpenLandMap_ELEV_DLCM_fix.nc"
-    f_MODIS_landinfo = f'/g/data/w97/mm3972/scripts/Drought/Post_drought_rainfall/process_for_CABLE/nc_files/gridinfo_AWAP_OpenLandMap_ELEV_DLCM_fix_MODIS_LAI_albedo_lc_time_varying_{year}.nc'
+    f_MODIS_landinfo = f'/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/process_for_CABLE/nc_files/gridinfo_AWAP_OpenLandMap_ELEV_DLCM_fix_MODIS_LAI_albedo_lc_time_varying_{year}.nc'
 
     # Open the source NetCDF file in read mode
     f_in  = nc.Dataset(f_landinfo, 'r')
@@ -216,9 +227,18 @@ def add_time_varying(year,window=31):
     for name, dimension in f_in.dimensions.items():
         f_out.createDimension(name, len(dimension) if not dimension.isunlimited() else None)
 
-    # Copy variables except LAI and Albedo
+    # # Copy variables except LAI and Albedo
+    # for name, variable in f_in.variables.items():
+    #     if name not in ['LAI', 'Albedo']:
+    #         f_out_var = f_out.createVariable(name, variable.datatype, variable.dimensions)
+    #         # Copy variable attributes
+    #         f_out_var.setncatts({attr: variable.getncattr(attr) for attr in variable.ncattrs()})
+    #         # Copy data
+    #         f_out_var[:] = variable[:]
+
+    # Copy variables except LAI
     for name, variable in f_in.variables.items():
-        if name not in ['LAI', 'Albedo']:
+        if name != 'LAI':
             f_out_var = f_out.createVariable(name, variable.datatype, variable.dimensions)
             # Copy variable attributes
             f_out_var.setncatts({attr: variable.getncattr(attr) for attr in variable.ncattrs()})
@@ -236,9 +256,10 @@ def add_time_varying(year,window=31):
     lai_var[:, :, :]   = lai_in
 
     # Create new Albedo variable with dimensions [4, 365 or 366, latitude, longitude]
-    albedo_var            = f_out.createVariable('Albedo', 'f4', ('rad1', 'time1', 'latitude', 'longitude'),fill_value=-9999)
+    albedo_var            = f_out.createVariable('Albedo_MODIS', 'f4', ('rad1', 'time1', 'latitude', 'longitude'),fill_value=-9999)
     albedo_var.units      = 'dimensionless'
-    albedo_var.long_name  = 'Surface albedo, 1: BSA_vis, 2: BSA_nir, 3: WSA_vis, 4: WSA_nir"'
+    # albedo_var.long_name  = 'Surface albedo, 1: BSA_vis, 2: BSA_nir, 3: WSA_vis, 4: WSA_nir"'
+    albedo_var.long_name  = 'MODIS surface albedo, 1: BSA_vis, 2: BSA_nir, 3: WSA_vis, 4: WSA_nir"'
     albedo_var[:, :, :, :] = albedo_in
 
     # copy new landcover
@@ -250,7 +271,7 @@ def add_time_varying(year,window=31):
 
 def use_SM_ST_after_90year_spinup(leap_year=None, year=None):
 
-    file_in = "/g/data/w97/mm3972/model/cable/runs/Post_drought_rainfall_runs/prepare_SM_ST_for_offline_run/outputs/cable_out_1999.nc"
+    file_in = "/g/data/w97/mm3972/model/cable/runs/Land_drought_rainfall_runs/prepare_SM_ST_for_offline_run/outputs/cable_out_1999.nc"
 
     with nc.Dataset(file_in, 'r') as f_in:
         SM_in  = f_in.variables['SoilMoist'][:,:, :, :]
@@ -262,24 +283,47 @@ def use_SM_ST_after_90year_spinup(leap_year=None, year=None):
 
     # Open the original NetCDF file
     if leap_year==None:
-        file_out = f'/g/data/w97/mm3972/scripts/Drought/Post_drought_rainfall/process_for_CABLE/nc_files/gridinfo_AWAP_OpenLandMap_ELEV_DLCM_fix_MODIS_LAI_albedo_lc_time_varying_{year}.nc'
+        file_out = f'/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/process_for_CABLE/nc_files/gridinfo_AWAP_OpenLandMap_ELEV_DLCM_fix_MODIS_LAI_albedo_lc_time_varying_{year}.nc'
     elif leap_year=='True':
-        file_out = '/g/data/w97/mm3972/scripts/Drought/Post_drought_rainfall/process_for_CABLE/nc_files/gridinfo_AWAP_OpenLandMap_ELEV_DLCM_fix_MODIS_LAI_albedo_lc_clim_leap.nc'
+        file_out = '/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/process_for_CABLE/nc_files/gridinfo_AWAP_OpenLandMap_ELEV_DLCM_fix_MODIS_LAI_albedo_lc_clim_leap.nc'
     elif leap_year=='False':
-        file_out = '/g/data/w97/mm3972/scripts/Drought/Post_drought_rainfall/process_for_CABLE/nc_files/gridinfo_AWAP_OpenLandMap_ELEV_DLCM_fix_MODIS_LAI_albedo_lc_clim_common.nc'
+        file_out = '/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/process_for_CABLE/nc_files/gridinfo_AWAP_OpenLandMap_ELEV_DLCM_fix_MODIS_LAI_albedo_lc_clim_common.nc'
 
     # Open the source NetCDF file in read mode
-    f_out   = nc.Dataset(file_out, 'r+')
-    lat_out = f_out.variables['latitude'][:]
-    lon_out = f_out.variables['longitude'][:]
+    f_out    = nc.Dataset(file_out, 'r+')
+    lat_out  = f_out.variables['latitude'][:]
+    lon_out  = f_out.variables['longitude'][:]
+    watr_out = f_out.variables['watr'][:]
+
     for m in np.arange(12):
         for s in np.arange(6):
-            f_out.variables['SoilMoist'][m,s,:,:] = regrid_data(lat_in, lon_in, lat_out, lon_out, SM_in[m,s,:,:], method='nearest',threshold=None)
+            SoilMoist_tmp = regrid_data(lat_in, lon_in, lat_out, lon_out, SM_in[m,s,:,:], method='nearest',threshold=None)
+            f_out.variables['SoilMoist'][m,s,:,:] = np.where(SoilMoist_tmp > watr_out[s,:,:], SoilMoist_tmp, watr_out[s,:,:]+0.001) # to make sure SM is always larger than watr
             f_out.variables['SoilTemp'][m,s,:,:]  = regrid_data(lat_in, lon_in, lat_out, lon_out, ST_in[m,s,:,:], method='nearest',threshold=None)
 
     f_out.close()
 
     return
+
+def increase_hydraulic_conductivity(leap_year=None, year=None):
+
+    # Open the original NetCDF file
+    if leap_year==None:
+        file_out = f'/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/process_for_CABLE/nc_files/gridinfo_AWAP_OpenLandMap_ELEV_DLCM_fix_MODIS_LAI_albedo_lc_time_varying_{year}.nc'
+    elif leap_year=='True':
+        file_out = '/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/process_for_CABLE/nc_files/gridinfo_AWAP_OpenLandMap_ELEV_DLCM_fix_MODIS_LAI_albedo_lc_clim_leap.nc'
+    elif leap_year=='False':
+        file_out = '/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/process_for_CABLE/nc_files/gridinfo_AWAP_OpenLandMap_ELEV_DLCM_fix_MODIS_LAI_albedo_lc_clim_common.nc'
+
+    # Open the source NetCDF file in read mode
+    f_out    = nc.Dataset(file_out, 'r+')
+    f_out.variables['hyds'][:]      = f_out.variables['hyds'][:]*10.
+    f_out.variables['hyds_vec'][:]  = f_out.variables['hyds_vec'][:]*10.
+
+    f_out.close()
+
+    return
+
 
 if __name__ == "__main__":
 
@@ -293,8 +337,10 @@ if __name__ == "__main__":
 
     if args.leap_year != None:
     #    add_climatology(args.leap_year, args.window)
-       use_SM_ST_after_90year_spinup(args.leap_year)
+    #    use_SM_ST_after_90year_spinup(args.leap_year)
+       increase_hydraulic_conductivity(args.leap_year)
     else:
        for year in np.arange(2000,2024,1):
-           # add_time_varying(year, args.window) # args.window
-           use_SM_ST_after_90year_spinup(year=year)
+        #    add_time_varying(year, args.window) # args.window
+        #    use_SM_ST_after_90year_spinup(year=year)
+           increase_hydraulic_conductivity(year=year)
