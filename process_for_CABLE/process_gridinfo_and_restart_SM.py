@@ -51,61 +51,6 @@ def regrid_data(lat_in, lon_in, lat_out, lon_out, input_data, method='linear',th
 
     return Value
 
-def use_SM_ST_after_90year_spinup(leap_year=None, year=None):
-
-    file_in = "/g/data/w97/mm3972/model/cable/runs/Land_drought_rainfall_runs/prepare_SM_ST_for_offline_run/outputs/cable_out_1999.nc"
-
-    with nc.Dataset(file_in, 'r') as f_in:
-        SM_in  = f_in.variables['SoilMoist'][:,:, :, :]
-        ST_in  = f_in.variables['SoilTemp'][:,:, :, :]
-        lat_in = f_in.variables['latitude'][:, :]
-        lon_in = f_in.variables['longitude'][:, :]
-        SM_in  = np.where(SM_in<0, np.nan, SM_in)
-        ST_in  = np.where(ST_in<0, np.nan, ST_in)
-
-    # Open the original NetCDF file
-    if leap_year==None:
-        file_out = f'/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/process_for_CABLE/nc_files/gridinfo_AWAP_OpenLandMap_ELEV_DLCM_fix_MODIS_LAI_albedo_lc_time_varying_{year}.nc'
-    elif leap_year=='True':
-        file_out = '/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/process_for_CABLE/nc_files/gridinfo_AWAP_OpenLandMap_ELEV_DLCM_fix_MODIS_LAI_albedo_lc_clim_leap.nc'
-    elif leap_year=='False':
-        file_out = '/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/process_for_CABLE/nc_files/gridinfo_AWAP_OpenLandMap_ELEV_DLCM_fix_MODIS_LAI_albedo_lc_clim_common.nc'
-
-    # Open the source NetCDF file in read mode
-    f_out    = nc.Dataset(file_out, 'r+')
-    lat_out  = f_out.variables['latitude'][:]
-    lon_out  = f_out.variables['longitude'][:]
-    watr_out = f_out.variables['watr'][:]
-
-    for m in np.arange(12):
-        for s in np.arange(6):
-            SoilMoist_tmp = regrid_data(lat_in, lon_in, lat_out, lon_out, SM_in[m,s,:,:], method='nearest',threshold=None)
-            f_out.variables['SoilMoist'][m,s,:,:] = np.where(SoilMoist_tmp > watr_out[s,:,:], SoilMoist_tmp, watr_out[s,:,:]+0.001) # to make sure SM is always larger than watr
-            f_out.variables['SoilTemp'][m,s,:,:]  = regrid_data(lat_in, lon_in, lat_out, lon_out, ST_in[m,s,:,:], method='nearest',threshold=None)
-
-    f_out.close()
-
-    return
-
-def increase_hydraulic_conductivity(leap_year=None, year=None):
-
-    # Open the original NetCDF file
-    if leap_year==None:
-        file_out = f'/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/process_for_CABLE/nc_files/gridinfo_AWAP_OpenLandMap_ELEV_DLCM_fix_MODIS_LAI_albedo_lc_time_varying_{year}.nc'
-    elif leap_year=='True':
-        file_out = '/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/process_for_CABLE/nc_files/gridinfo_AWAP_OpenLandMap_ELEV_DLCM_fix_MODIS_LAI_albedo_lc_clim_leap.nc'
-    elif leap_year=='False':
-        file_out = '/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/process_for_CABLE/nc_files/gridinfo_AWAP_OpenLandMap_ELEV_DLCM_fix_MODIS_LAI_albedo_lc_clim_common.nc'
-
-    # Open the source NetCDF file in read mode
-    f_out    = nc.Dataset(file_out, 'r+')
-    f_out.variables['hyds'][:]      = f_out.variables['hyds'][:]*10.
-    f_out.variables['hyds_vec'][:]  = f_out.variables['hyds_vec'][:]*10.
-
-    f_out.close()
-
-    return
-
 def reduce_soil_moisture_in_gridinfo(reduce_percent=10, leap_year=None, year=None):
 
     # Shink to
@@ -152,6 +97,28 @@ def reduce_soil_moisture_in_restart(reduce_percent=10):
 
     return
 
+
+def reduce_groundwater_soil_moisture_in_restart(reduce_percent=10):
+   
+    # Shink to
+    shink_to = (100-reduce_percent)/100
+
+    # Reduce aquifer moisture
+    file_restart = f'/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/process_for_CABLE/nc_files/CABLE_restart_files/restart_1970_one_year_5km_run_with_SM_ST_spinup_read_from_gridinfo_GWMoist_reduce_{reduce_percent}percent.nc'
+    
+    with nc.Dataset(file_restart, 'r+') as f_restart:
+        # Confirm correct variable name
+        watr_hys = f_restart.variables.get('watr_hys', None)
+        if watr_hys is None:
+            raise KeyError("Variable 'watr_hys' not found in the file.")
+
+        # watr_hys                         = f_restart.variables['watr_hys'][:]
+        tmp                              = f_restart.variables['GWwb'][:]*shink_to
+        f_restart.variables['GWwb'][:]   = np.where(tmp>watr_hys[5,:], tmp, watr_hys[5,:])
+
+    return
+
+
 if __name__ == "__main__":
 
     reduce_percent = 10 
@@ -168,5 +135,17 @@ if __name__ == "__main__":
     #     reduce_soil_moisture_in_gridinfo(reduce_percent=reduce_percent, year=year)
     #     print(f'Finish {year}')
 
-    reduce_soil_moisture_in_restart(reduce_percent)
+    # reduce_soil_moisture_in_restart(reduce_percent)
+    reduce_percent = 60 
+    reduce_groundwater_soil_moisture_in_restart(reduce_percent)
+
+    reduce_percent = 70 
+    reduce_groundwater_soil_moisture_in_restart(reduce_percent)
+    
+    reduce_percent = 80 
+    reduce_groundwater_soil_moisture_in_restart(reduce_percent)
+
+    reduce_percent = 90 
+    reduce_groundwater_soil_moisture_in_restart(reduce_percent)
+
     print('Finish restart')

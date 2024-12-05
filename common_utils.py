@@ -21,8 +21,8 @@ def leap_year(year):
 def get_scale(var_name):
     pa2hpa     = ['ps']
     m2mm       = ['tp']
-    mm_s2mm_yr = ['Qs','Qsb','Rainf','Evap','ESoil','ECanop','TVeg']
-    mm_s2mm_day= ['Rainf_tavg']
+    mm_s2mm_yr = ['Qs','Qsb','Evap','ESoil','ECanop','TVeg']
+    mm_s2mm_day= ['Rainf_tavg','Rainf']
     if var_name in mm_s2mm_yr:
         scale = 24.*3600.*365
     elif var_name in mm_s2mm_day:

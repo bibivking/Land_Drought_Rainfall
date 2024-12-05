@@ -304,7 +304,7 @@ def use_SM_ST_after_90year_spinup(leap_year=None, year=None):
     f_out.close()
 
     return
-
+    
 def increase_hydraulic_conductivity(leap_year=None, year=None):
 
     # Open the original NetCDF file
@@ -323,8 +323,7 @@ def increase_hydraulic_conductivity(leap_year=None, year=None):
     f_out.close()
 
     return
-
-
+    
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Generate new landinfo file with MODIS LAI and albedo.')
@@ -336,11 +335,8 @@ if __name__ == "__main__":
     print(args)
 
     if args.leap_year != None:
-    #    add_climatology(args.leap_year, args.window)
-    #    use_SM_ST_after_90year_spinup(args.leap_year)
-       increase_hydraulic_conductivity(args.leap_year)
+       add_climatology(args.leap_year, args.window)
     else:
        for year in np.arange(2000,2024,1):
-        #    add_time_varying(year, args.window) # args.window
-        #    use_SM_ST_after_90year_spinup(year=year)
-           increase_hydraulic_conductivity(year=year)
+           add_time_varying(year, args.window) # args.window
+

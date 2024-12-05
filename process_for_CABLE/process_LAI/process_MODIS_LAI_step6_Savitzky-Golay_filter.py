@@ -48,8 +48,24 @@ def run_savizky_golay_filter(file_in, file_out, window_length=15, polyorder=2):
     # Reorder the dimensions to (time, lat, lon)
     smoothed_lai       = smoothed_lai.transpose("time", "latitude", "longitude")
 
+    smoothed_lai_tmp   = np.where(np.isnan(smoothed_lai), 0.001, smoothed_lai)
+    smoothed_lai_tmp   = np.where(smoothed_lai_tmp>20,    0.001, smoothed_lai_tmp)
+    smoothed_lai_tmp   = np.where(smoothed_lai_tmp<0,     0.001, smoothed_lai_tmp)
+
+    # Convert smoothed_lai_tmp back to an Xarray DataArray with dimension names
+    smoothed_lai_tmp_da = xr.DataArray(
+                                smoothed_lai_tmp,
+                                dims=("time", "latitude", "longitude"),  # Ensure these match your dataset's dimensions
+                                coords={
+                                    "time": smoothed_lai["time"], 
+                                    "latitude": smoothed_lai["latitude"], 
+                                    "longitude": smoothed_lai["longitude"],
+                                },
+                                attrs=smoothed_lai.attrs  # Copy the attributes
+                            )
+
     # Add the smoothed data back to the Dataset
-    ds_chunked["Lai_500m"] = smoothed_lai
+    ds_chunked["Lai_500m"] = smoothed_lai_tmp_da
 
     # Check if the file exists
     if os.path.exists(file_out):

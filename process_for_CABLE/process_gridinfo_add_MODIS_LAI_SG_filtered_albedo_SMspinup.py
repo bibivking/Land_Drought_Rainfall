@@ -90,6 +90,7 @@ def add_climatology(leap_year,window=31):
     file_lai = f"{lai_path}/regrid_2_AWAP_5km_climatology/MCD15A3H.061_clim_5km_{leap_common}year_{window}day_smooth_SG_filter_window=15timestep_order=2.nc"
     with nc.Dataset(file_lai, 'r') as f_lai:
         lai_in = f_lai.variables['LAI'][:, :, :]
+        lai_in = np.where(np.isnan(lai_in), 0.001, lai_in) 
         lai_in = np.where(lai_in>20, 0.001, lai_in) # set to the value of C%LAI_THRESH in CABLE
         lai_in = np.where(lai_in<0,  0.001, lai_in)
 
@@ -195,6 +196,7 @@ def add_time_varying(year,window=31):
 
     with nc.Dataset(file_lai, 'r') as f_lai:
         lai_in = f_lai.variables['LAI'][:, :, :]
+        lai_in = np.where(np.isnan(lai_in), 0.001, lai_in) 
         lai_in = np.where(lai_in>20, 0.001, lai_in) # set to the value of C%LAI_THRESH in CABLE
         lai_in = np.where(lai_in<0,  0.001, lai_in)
 
@@ -324,8 +326,7 @@ def increase_hydraulic_conductivity(leap_year=None, year=None):
     f_out.close()
 
     return
-
-
+    
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Generate new landinfo file with MODIS LAI and albedo.')
@@ -338,10 +339,6 @@ if __name__ == "__main__":
 
     if args.leap_year != None:
        add_climatology(args.leap_year, args.window)
-       use_SM_ST_after_90year_spinup(args.leap_year)
-    #    increase_hydraulic_conductivity(args.leap_year)
     else:
        for year in np.arange(2000,2024,1):
            add_time_varying(year, args.window) # args.window
-           use_SM_ST_after_90year_spinup(year=year)
-        #    increase_hydraulic_conductivity(year=year)
