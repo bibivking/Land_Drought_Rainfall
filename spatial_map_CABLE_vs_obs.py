@@ -159,7 +159,7 @@ def plot_spital_map( yr, file_paths, var_names, time_s, time_e, file_paths2=None
         var        = var  * 365
         clevs      = np.linspace(0., 2000., num=21)
         clevs_diff = np.linspace(-200., 200., num=21)
-        
+
     if soil_layer != None:
         plot1 = axs[0].contourf(lons1, lats1, var1[soil_layer,:,:], levels=clevs, transform=ccrs.PlateCarree(), extend='both', cmap=plt.cm.BrBG)
         plot2 = axs[1].contourf(lons2, lats2, var2[soil_layer,:,:], levels=clevs, transform=ccrs.PlateCarree(), extend='both', cmap=plt.cm.BrBG)
@@ -318,9 +318,14 @@ if __name__ == "__main__":
     SP_GW_reduce10_path = "/g/data/w97/mm3972/model/cable/runs/Land_drought_rainfall_runs/spinup_run_1970_1999_GWMoist_reduce_10percent/outputs/"
     SP_GW_reduce30_path = "/g/data/w97/mm3972/model/cable/runs/Land_drought_rainfall_runs/spinup_run_1970_1999_GWMoist_reduce_30percent/outputs/"
     SP_GW_reduce50_path = "/g/data/w97/mm3972/model/cable/runs/Land_drought_rainfall_runs/spinup_run_1970_1999_GWMoist_reduce_50percent/outputs/"
-    
+
+    SP_GW_reduce60_path = "/g/data/w97/mm3972/model/cable/runs/Land_drought_rainfall_runs/spinup_run_1970_1999_GWMoist_reduce_60percent/outputs/"
+    SP_GW_reduce70_path = "/g/data/w97/mm3972/model/cable/runs/Land_drought_rainfall_runs/spinup_run_1970_1999_GWMoist_reduce_70percent/outputs/"
+    SP_GW_reduce80_path = "/g/data/w97/mm3972/model/cable/runs/Land_drought_rainfall_runs/spinup_run_1970_1999_GWMoist_reduce_80percent/outputs/"
+    SP_GW_reduce90_path = "/g/data/w97/mm3972/model/cable/runs/Land_drought_rainfall_runs/spinup_run_1970_1999_GWMoist_reduce_90percent/outputs/"
+
     SP_GW_reduce50_file = SP_GW_reduce50_path + "cable_out_1970-1999.nc"
-    
+
     CABLE_off_path = "/scratch/w97/mm3972/model/CABLE/Land_drought_rainfall_runs/run_2000_2019_daily_rst_control/outputs/"
     CABLE_off_file = CABLE_off_path + "cable_out_2000-2019.nc"
 
@@ -339,24 +344,24 @@ if __name__ == "__main__":
             year_e      = datetime(yr,12,31)
             loc_lat     = [-45,-5]
             loc_lon     = [112,154]
-        
+
             #### plot AGCD vs ERA5 rainfall ###
             print("plot AGCD vs ERA5 rainfall")
             file_paths1 = [f"{SP_off_path}cable_out_{yr}.nc"]
             file_paths2 = sorted(glob.glob(f"{ERA5_rain_path}/{yr}/*.nc"))
-            
+
             var_name    = ["Rainf","tp"]
             lat_names   = ["latitude","latitude"]#"lat"
             lon_names   = ["longitude","longitude"]#"lon"
-        
+
             message     = f"SP_LAI_SG-ERA5_Rain_{yr}"
-        
+
             plot_spital_map( yr, file_paths1, var_name, year_s, year_e, file_paths2=file_paths2, loc_lat=loc_lat, loc_lon=loc_lon, lat_names=lat_names,
                             lon_names=lon_names,message=message)
 
     if 0:
         ### Compare two CABLE simulations
-        
+
         '''
         plot new SP vs old SP
         '''
@@ -397,34 +402,33 @@ if __name__ == "__main__":
             plot_spital_map( yr, file_paths1, var_name, year_s, year_e, file_paths2=file_paths2, loc_lat=loc_lat, loc_lon=loc_lon, lat_names=lat_names,
                             lon_names=lon_names,message=message)
 
-
     if 0:
 
-        ### Compare CABLE 1970-1999 simulations with OBS 
+        ### Compare CABLE 1970-1999 simulations with OBS
 
         '''
         plot SP vs GLEAM
         '''
-        
+
         for yr in np.arange(1980, 2000):
             year_s      = datetime(yr,1,1)
             year_e      = datetime(yr,12,31)
             loc_lat     = [-45,-5]
             loc_lon     = [112,154]
-        
+
             #### plot Evap new SP vs GLEAM ###
             print("plot Evap vs GLEAM")
-            file_paths1 = [f"{SP_GW_reduce50_path}cable_out_{yr}.nc"]
+            file_paths1 = [f"{SP_GW_reduce90_path}cable_out_{yr}.nc"]
             file_paths2 = [GLEAM_file]
             var_name    = ["Evap","E"]
             lat_names   = ["latitude","lat"]#"lat"
             lon_names   = ["longitude","lon"]#"lon"
-            
-            message     = f"SP_LAI_SG_GW_reduce50-GLEAM_Evap_{yr}"
-        
+
+            message     = f"SP_LAI_SG_GW_reduce90-GLEAM_Evap_{yr}"
+
             plot_spital_map( yr, file_paths1, var_name, year_s, year_e, file_paths2=file_paths2, loc_lat=loc_lat, loc_lon=loc_lon, lat_names=lat_names,
                             lon_names=lon_names,message=message)
-        
+
 
         '''
         plot SP vs AWRA
@@ -438,31 +442,31 @@ if __name__ == "__main__":
 
             #### plot Evap new SP vs AWRA ###
             print("plot Evap vs AWRA")
-            file_paths1 = [f"{SP_GW_reduce50_path}cable_out_{yr}.nc"]
+            file_paths1 = [f"{SP_GW_reduce90_path}cable_out_{yr}.nc"]
             file_paths2 = [f"{AWRA_ET_path}etot_{yr}.nc"]
             var_name    = ["Evap","etot"]
             lat_names   = ["latitude","latitude"]#"lat"
             lon_names   = ["longitude","longitude"]#"lon"
 
-            message     = f"SP_LAI_SG_GW_reduce50-AWRA_Evap_{yr}"
+            message     = f"SP_LAI_SG_GW_reduce90-AWRA_Evap_{yr}"
 
             plot_spital_map( yr, file_paths1, var_name, year_s, year_e, file_paths2=file_paths2, loc_lat=loc_lat, loc_lon=loc_lon, lat_names=lat_names,
                             lon_names=lon_names,message=message)
 
     if 1:
 
-        ### Compare CABLE 2000-2019 simulations with OBS 
+        ### Compare CABLE 2000-2019 simulations with OBS
 
         # '''
         # plot CABLE vs GLEAM
         # '''
-        
+
         # for yr in np.arange(2000, 2020):
         #     year_s      = datetime(yr,1,1)
         #     year_e      = datetime(yr,12,31)
         #     loc_lat     = [-45,-5]
         #     loc_lon     = [112,154]
-        
+
         #     #### plot Evap new SP vs GLEAM ###
         #     print("plot Evap vs GLEAM")
         #     file_paths1 = [f"{CABLE_GW_reduce50_path}cable_out_{yr}.nc"]
@@ -470,13 +474,13 @@ if __name__ == "__main__":
         #     var_name    = ["Evap","E"]
         #     lat_names   = ["latitude","lat"]#"lat"
         #     lon_names   = ["longitude","lon"]#"lon"
-    
-            
+
+
         #     message     = f"OFF_LAI_SG_GW_reduce50-GLEAM_Evap_{yr}"
-        
+
         #     plot_spital_map( yr, file_paths1, var_name, year_s, year_e, file_paths2=file_paths2, loc_lat=loc_lat, loc_lon=loc_lon, lat_names=lat_names,
         #                     lon_names=lon_names,message=message)
-        
+
 
         # '''
         # plot OFF vs AWRA
@@ -511,7 +515,7 @@ if __name__ == "__main__":
             year_e      = datetime(yr,12,31)
             loc_lat     = [-45,-5]
             loc_lon     = [112,154]
-        
+
             file_paths1 = [f"{CABLE_GW_reduce50_path}cable_out_{yr}.nc"]
             file_paths2 = [DOLCE_file]
             var_name    = ["Qle","hfls"]
@@ -523,24 +527,24 @@ if __name__ == "__main__":
                             lon_names=lon_names,message=message)
 
 
-        ### plot Qle vs DOLCE ###
-        print("plot Qle vs DOLCE")
+        # ### plot Qle vs DOLCE ###
+        # print("plot Qle vs DOLCE")
 
-        for yr in np.arange(2000, 2019):
-            year_s      = datetime(yr,1,1)
-            year_e      = datetime(yr,12,31)
-            loc_lat     = [-45,-5]
-            loc_lon     = [112,154]
-        
-            file_paths1 = [f"{CABLE_off_path}cable_out_{yr}.nc"]
-            file_paths2 = [DOLCE_file]
-            var_name    = ["Qle","hfls"]
-            lat_names   = ["latitude","lat"]#"lat"
-            lon_names   = ["longitude","lon"]#"lon"
-            message     = f'OFF_LAI_SG-DOLCE_Qle_{yr}'
+        # for yr in np.arange(2000, 2019):
+        #     year_s      = datetime(yr,1,1)
+        #     year_e      = datetime(yr,12,31)
+        #     loc_lat     = [-45,-5]
+        #     loc_lon     = [112,154]
 
-            plot_spital_map( yr, file_paths1, var_name, year_s, year_e, file_paths2=file_paths2, loc_lat=loc_lat, loc_lon=loc_lon, lat_names=lat_names,
-                            lon_names=lon_names,message=message)
+        #     file_paths1 = [f"{CABLE_off_path}cable_out_{yr}.nc"]
+        #     file_paths2 = [DOLCE_file]
+        #     var_name    = ["Qle","hfls"]
+        #     lat_names   = ["latitude","lat"]#"lat"
+        #     lon_names   = ["longitude","lon"]#"lon"
+        #     message     = f'OFF_LAI_SG-DOLCE_Qle_{yr}'
+
+        #     plot_spital_map( yr, file_paths1, var_name, year_s, year_e, file_paths2=file_paths2, loc_lat=loc_lat, loc_lon=loc_lon, lat_names=lat_names,
+        #                     lon_names=lon_names,message=message)
 
 
 
@@ -593,7 +597,7 @@ if __name__ == "__main__":
             year_e      = datetime(1999,12,31)
 
             file_paths= [SP_off_file, SP_GW_reduce50_file, GLEAM_file]
-            
+
             var_names = ["Evap","Evap","E",]
             lat_names = ["latitude","latitude","lat"]
             lon_names = ["longitude","longitude","lon"]
