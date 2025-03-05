@@ -18,11 +18,12 @@ from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
 from multiprocessing import Pool
 from common_utils import *
 
-def plot_drought_breaking_date(i, time, drought_break_day, precip_day, lat, lon):
+def plot_drought_breaking_date(i, time, drought_break_day, precip_day, lat, lon, method=None, condition=None):
 
     loc_lat  = [-45,-5]
     loc_lon  = [110,156]
     year     = time.year
+
     print(time)
 
     # print('drought_break_day', drought_break_day)
@@ -84,7 +85,13 @@ def plot_drought_breaking_date(i, time, drought_break_day, precip_day, lat, lon)
         cbar1.set_label('Rainfall (mm/day)')
         # ax.text(0.02, 0.95, texts[i], transform=ax.transAxes, fontsize=12, bbox=props)
 
-        output_path = f"/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/identify_drought_break_events/plots/drought_breaking_date/{year}"
+        if method != None:
+            if condition != None:
+                output_path = f"/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/identify_drought_break_events/plots/drought_breaking_date/{method}_{condition}/{year}"
+            else:
+                output_path = f"/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/identify_drought_break_events/plots/drought_breaking_date/{method}/{year}"
+        else:
+            output_path = f"/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/identify_drought_break_events/plots/drought_breaking_date/{year}"
 
         print(f'output_path is {output_path}')
 
@@ -96,25 +103,44 @@ def plot_drought_breaking_date(i, time, drought_break_day, precip_day, lat, lon)
 
     return
 
-def plot_drought_breaking_multi_date():
+def plot_drought_breaking_multi_date(method=None, condition=None):
 
-    input_file = '/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/identify_drought_break_events/nc_files/spi_pearson_90_reorder_nan_filled_drought_breaking_date.nc'
+    print('method', method, 'condition', condition)
+    
+    if method != None:
+        if condition != None:
+            input_file = f'/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/identify_drought_break_events/nc_files/spi_pearson_90_reorder_nan_filled_drought_breaking_date_{method}_{condition}.nc'
+        else:
+            input_file = f'/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/identify_drought_break_events/nc_files/spi_pearson_90_reorder_nan_filled_drought_breaking_date_{method}.nc'
+    else:
+        input_file = '/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/identify_drought_break_events/nc_files/spi_pearson_90_reorder_nan_filled_drought_breaking_date_method1.nc'
+    
+    print(input_file)
+    
     mask_file  = '/g/data/w97/mm3972/model/cable/src/CABLE-AUX/offline/mmy_gridinfo_AU/gridinfo_AWAP_OpenLandMap_DLCM_mask.nc'
     rain_file  = '/g/data/w97/mm3972/scripts/Land_Drought_Rainfall/identify_drought_break_events/nc_files/agcd_v1_precip_total_r005_daily_1950_2023.nc'
+    
+    if method == 'method1':
+        var_name  = 'drought_break_days'
+    elif method == 'method2':
+        var_name  = 'is_drought_break'
+    else:
+        var_name  = 'drought_break_days'
 
     with nc.Dataset(input_file, mode='r') as f_in:
         lat_out            = f_in.variables['lat'][:]
         lon_out            = f_in.variables['lon'][:]
-        drought_break_days = f_in.variables['drought_break_days'][:,:,:]
-        time               = nc.num2date(f_in.variables['time'][:],f_in.variables['time'].units,
+        drought_break_days = f_in.variables[var_name][-8766:,:,:]
+        time               = nc.num2date(f_in.variables['time'][-8766:],f_in.variables['time'].units,
                              only_use_cftime_datetimes=False,only_use_python_datetimes=True)
         ntime              = len(time)
-
+        # print('ntime', ntime)
+        
     with nc.Dataset(rain_file, mode='r') as f_rain:
         lat_rain         = f_rain.variables['lat'][10:]
         lon_rain         = f_rain.variables['lon'][:-45]
-        precip           = f_rain.variables['precip'][:,10:,:-45]
-        time_rain        = nc.num2date(f_rain.variables['time'][:],f_rain.variables['time'].units,
+        precip           = f_rain.variables['precip'][-8766:,10:,:-45]
+        time_rain        = nc.num2date(f_rain.variables['time'][-8766:],f_rain.variables['time'].units,
                             only_use_cftime_datetimes=False,only_use_python_datetimes=True)
         ntime_rain       = len(time)
 
@@ -123,11 +149,14 @@ def plot_drought_breaking_multi_date():
 
     landsea_3d           = np.repeat(landsea[np.newaxis, :, :], ntime, axis=0)
     drought_break_days   = np.where(landsea_3d==0, drought_break_days, np.nan)
+    drought_break_days   = np.where(drought_break_days<-1, np.nan, drought_break_days)
     precip               = np.where(landsea_3d==0, precip, np.nan)
+    
     print('finish reading')
+
     # Prepare arguments for parallel processing
     args_list = [ (i, time[i], drought_break_days[i,:,:], precip[i,:,:],
-                    lat_out, lon_out) for i in np.arange(18263, ntime)]
+                    lat_out, lon_out, method, condition) for i in np.arange(ntime)]
 
     # Use multiprocessing to calculate accumulated days for each grid point
     with Pool() as pool:
@@ -137,5 +166,8 @@ def plot_drought_breaking_multi_date():
 
 # Main script
 if __name__ == "__main__":
+    
+    method    = 'method2'
+    condition = 'condition2'
 
-    plot_drought_breaking_multi_date()
+    plot_drought_breaking_multi_date(method=method, condition=condition)

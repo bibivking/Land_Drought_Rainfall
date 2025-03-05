@@ -32,3 +32,5 @@ csv/
 nc_file/
 nc_files/
 ./identify_drought_break_events/climate_indices
+
+./back_trajectory

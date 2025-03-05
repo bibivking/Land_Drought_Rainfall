@@ -14,7 +14,7 @@ from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
 from scipy.interpolate import griddata
 import cartopy.feature as cfeature
 import matplotlib.ticker as mticker
-from common_utils import *
+from common_utils import * 
 
 # Create new nc file to save climatology SM 
 file_path = "/g/data/w97/mm3972/model/cable/runs/Land_drought_rainfall_runs/spinup_run_1970_1999/outputs"
