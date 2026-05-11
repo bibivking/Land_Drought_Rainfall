@@ -1,0 +1,4 @@
+source codes are in https://gitlab.phaidra.org/flexpart/flexpart/-/tree/master.
+@16Dec2024 the author hasn't updated ./src/makefile_intel (author's latest edits were 1 year ago while chemistry_mod.f90 etc are now). I tried to use makefile_intel, but it failed in compiling. I tried makefile_gfortran and it works well.
+
+
