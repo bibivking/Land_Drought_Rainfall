@@ -1,0 +1,18 @@
+name: flexpart_env
+channels:
+  - conda-forge
+dependencies:
+  - python=3
+  - numpy
+  - genshi
+  - eccodes
+  - ecmwf-api-client
+  - cdsapi
+  - gfortran_linux-64
+  - fftw
+  - libnetcdf  # needed by FLEXPART
+  - netcdf-fortran  # for FLEXPART Fortran side
+  - make
+  - wget
+  - curl
+
