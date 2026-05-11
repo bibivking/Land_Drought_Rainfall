@@ -1,0 +1,12 @@
+[submodule "back_trajectory/flexpart"]
+	path = back_trajectory/flexpart
+	url = https://gitlab.phaidra.org/flexpart/flex_extract.git
+[submodule "era5grib"]
+	path = era5grib
+	url = https://github.com/bibivking/era5grib.git
+[submodule "back_trajectory/flex_extract"]
+	path = back_trajectory/flex_extract
+	url = https://gitlab.phaidra.org/flexpart/flexpart.git
+[submodule "identify_drought_break_events/climate_indices"]
+	path = identify_drought_break_events/climate_indices
+	url = git@github.com:bibivking/climate_indices.git
